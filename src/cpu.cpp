@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <unistd.h>
 #include <vector>
 
 #include "cpu.h"
@@ -42,20 +43,44 @@ uint8_t get_core_count()
  * 
  * @returns The total CPU usage in percentage.
  */
-uint8_t get_cpu_usage()
+double get_cpu_usage()
 {
     std::ifstream file("/proc/stat");
     std::string line;
     std::string label; // cpu label, unused
 
-    // Processes
-    unsigned long long user, niced, system, idle, iowait, irq, softirq;
+    unsigned long long user1, niced1, system1, idle1, iowait1, irq1, 
+                       softirq1, steal1, guest1, guest_nice1;
 
-    file >> label >> user >> niced >> system >> idle >> iowait >> irq >> softirq;
+    file >> label >> user1 >> niced1 >> system1 >> idle1 >> iowait1 >> irq1
+                  >> softirq1 >> steal1 >> guest1 >> guest_nice1;
 
-    // Do calculation. NOTE: There are 3 trailing 0's present at the end of each CPU line in /proc/stat
+    unsigned long long total_idle1 = idle1 + iowait1;
+    unsigned long long total_non_idle1 = user1 + niced1 + system1 + irq1 + softirq1 + steal1;
+    unsigned long long total1 = total_idle1 + total_non_idle1;
 
-    return -1;
+    file.close();
+
+    usleep(100000); // 100 ms
+
+    file.open("/proc/stat");
+
+    unsigned long long user2, niced2, system2, idle2, iowait2, irq2, 
+                       softirq2, steal2, guest2, guest_nice2;
+
+    file >> label >> user2 >> niced2 >> system2 >> idle2 >> iowait2 >> irq2
+                  >> softirq2 >> steal2 >> guest2 >> guest_nice2;
+
+    unsigned long long total_idle2 = idle2 + iowait2;
+    unsigned long long total_non_idle2 = user2 + niced2 + system2 + irq2 + softirq2 + steal2;
+    unsigned long long total2 = total_idle2 + total_non_idle2;
+
+    file.close();
+
+    unsigned long long totald = total2 - total1;
+    unsigned long long idled = total_idle2 - total_idle1;
+
+    return 100.0 * (totald - idled) / totald;
 }
 
 

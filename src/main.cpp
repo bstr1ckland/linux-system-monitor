@@ -1,3 +1,4 @@
+#include <cmath>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/screen.hpp>
 #include <iostream>
@@ -24,7 +25,9 @@ int main()
     Render(screen, document);
     screen.Print();
 
-    cout << get_cpu_usage() << endl;
+    double cpu_usage = get_cpu_usage();
+
+    cout << std::round(cpu_usage * 100.0) / 100.0 << "% CPU Usage" << endl;
 
     return 0;
 }
