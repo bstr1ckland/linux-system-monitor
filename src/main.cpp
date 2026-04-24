@@ -1,10 +1,15 @@
 #include <cmath>
+#include <iostream>
+#include <filesystem>
+
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/screen.hpp>
-#include <iostream>
+
 #include "cpu.h"
+#include "utils.h"
 
 using namespace std;
+namespace fs = std::filesystem;
 
 int main()
 {
@@ -29,6 +34,8 @@ int main()
 
     int core_count = get_core_count();
     double cpu_usage = get_cpu_usage();
+    double cpu_temp = get_cpu_temperature();
+
     std::vector<double> cpu_usage_per_core = get_cpu_usage_per_core();
 
     cout << std::round(cpu_usage * 100.0) / 100.0 << "% CPU Usage" << endl;
@@ -37,6 +44,8 @@ int main()
     {
         cout << "cpu" + std::to_string(i) << ": " << std::round(cpu_usage_per_core[i] * 100.0) / 100.0 << "% CPU Usage" << endl;
     }
+
+    cout << "CPU Temperature: " << cpu_temp << endl;
     
     return 0;
 }

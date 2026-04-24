@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -7,8 +8,10 @@
 #include <vector>
 
 #include "cpu.h"
+#include "utils.h"
 
 using namespace std;
+namespace fs = std::filesystem;
 
 /**
  * Reference: 
@@ -35,7 +38,6 @@ int get_core_count()
 
     return -1;
 }
-
 
 /**
  * References:
@@ -151,4 +153,18 @@ std::vector<double> get_cpu_usage_per_core()
     }
 
     return core_percentages;
+}
+
+/**
+ * @returns Temperature of CPU in degrees (C).
+ */
+double get_cpu_temperature()
+{
+    fs::path path = hwmon_iter("k10temp");
+    std::ifstream file(path.string() + "/temp1_input");
+    double temp;
+
+    file >> temp;
+
+    return temp / 1000.0;
 }
