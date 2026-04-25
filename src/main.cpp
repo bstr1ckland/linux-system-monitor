@@ -1,12 +1,11 @@
 #include <cmath>
 #include <iostream>
 #include <filesystem>
-
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/screen.hpp>
-
 #include "cpu.h"
 #include "utils.h"
+#include "system.h"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -46,6 +45,11 @@ int main()
     }
 
     cout << "CPU Temperature: " << cpu_temp << endl;
+
+    cout << "System uptime (seconds): " << get_system_uptime() << endl;
+    cout << "Sum of idle time per core: " << get_idle_time() << endl;
+
+    cout << get_version() << endl;
     
     return 0;
 }

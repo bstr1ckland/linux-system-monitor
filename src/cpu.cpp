@@ -6,7 +6,6 @@
 #include <sstream>
 #include <unistd.h>
 #include <vector>
-
 #include "cpu.h"
 #include "utils.h"
 
@@ -34,6 +33,7 @@ int get_core_count()
             return std::stoi(line.substr(value));
         }
     }
+    
     file.close();
 
     return -1;
@@ -165,6 +165,8 @@ double get_cpu_temperature()
     double temp;
 
     file >> temp;
+
+    file.close();
 
     return temp / 1000.0;
 }

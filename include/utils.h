@@ -5,4 +5,4 @@
 
 std::string hwmon_iter(std::string target_info);
 
-#endif
+#endif // UTILS_H
