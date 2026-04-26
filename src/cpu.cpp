@@ -155,6 +155,9 @@ std::vector<double> get_cpu_usage_per_core()
 }
 
 /**
+ * Reference:
+ *   https://medium.com/@balemarthyvamsi/part-1-introduction-to-the-hwmon-subsystem-8000dbed11c4
+ * 
  * @returns Temperature of CPU in degrees (C).
  */
 double get_cpu_temperature()

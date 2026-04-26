@@ -24,6 +24,8 @@ fs::path hwmon_iter(std::string target_name)
         std::string name;
         file >> name;
 
+        file.close();
+
         if (name == target_name)
         {
             return entry.path();
