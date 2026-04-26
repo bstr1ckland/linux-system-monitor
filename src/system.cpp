@@ -10,12 +10,10 @@ using namespace std;
 double get_system_uptime()
 {
     double uptime;
-    
     std::ifstream file("/proc/uptime");
     
     // Grabs first instance, don't need second number here
     file >> uptime;
-
     file.close();
 
     return uptime;
@@ -31,7 +29,6 @@ double get_idle_time()
     std::ifstream file("/proc/uptime");
 
     file >> uptime >> idle_time;
-
     file.close();
 
     return idle_time;
