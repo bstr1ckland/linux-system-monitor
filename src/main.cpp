@@ -32,8 +32,7 @@ int main()
     screen.Print();
     */
 
-    cout << get_gpu_temp() << endl;
-    cout << get_gpu_usage() << endl;
+    cout << "Avg clock speed: " << get_avg_cpu_freq() << endl;
     
     return 0;
 }

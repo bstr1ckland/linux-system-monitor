@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -36,6 +37,96 @@ int get_core_count()
     file.close();
 
     return -1;
+}
+
+/**
+ * @returns Name of the CPU model.
+ */
+std::string get_cpu_name()
+{
+    std::ifstream file("/proc/cpuinfo");
+    std::string line;
+
+    // grabs first instance of the model name in cpuinfo.
+    // it appears core_count amount of times in that file
+    while (getline(file, line))
+    {
+        if (line.find("model name") != std::string::npos)
+        {
+            int pos = line.find(":");
+            std::string model_name = line.substr(pos + 2);
+            return model_name;
+        }
+    }
+
+    file.close();
+
+    return "";
+}
+
+/**
+ * @returns Max clock speed/frequency for all CPU cores (GHz).
+ */
+double get_max_cpu_freq()
+{
+    // all CPU cores have same max freq, grabs first instance (any instance works)
+    std::ifstream file("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
+    double max_freq;
+
+    file >> max_freq;
+    file.close();
+
+    max_freq /= 1000000.0;
+    return std::round(max_freq * 100.0) / 100.0; // convert to GHz
+}
+
+/**
+ * @returns Average clock speed/frequency of all CPU cores (GHz).
+ */
+double get_avg_cpu_freq()
+{
+    std::vector<double> cpu_freqs = get_cpu_freq_per_core();
+    double sum = 0;
+
+    for (int i = 0; i < get_core_count(); i++)
+    {
+        sum += cpu_freqs[i];
+    }
+
+    sum /= get_core_count();
+
+    return std::round(sum * 100.0) / 100.0; // convert to GHz
+}
+
+/**
+ * Reference:
+ *   https://askubuntu.com/questions/218567/any-way-to-check-the-clock-speed-of-my-processor
+ * 
+ * @returns Vector of CPU clock speed/frequency per core (GHz).
+ */
+std::vector<double> get_cpu_freq_per_core()
+{
+    std::vector<double> cpu_freqs;
+    std::ifstream file("/proc/cpuinfo");
+    std::string line;
+
+    for (int i = 0; i < get_core_count(); i++)
+    {
+        while (getline(file, line))
+        {
+            if (line.find("cpu MHz") != std::string::npos)
+            {
+                size_t value = line.find_first_of("0123456789");
+                double freq = std::stod(line.substr(value));
+
+                freq /= 1000.0;
+                freq = std::round(freq * 100.0) / 100.0;
+                cpu_freqs.push_back(freq);
+            }
+        }
+    }
+
+    return cpu_freqs;
 }
 
 /**
