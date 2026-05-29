@@ -15,13 +15,12 @@ namespace fs = std::filesystem;
  */
 std::string get_gpu_name()
 {
-    std::string name = exec("lspci -k | grep -EA2 'VGA|3D'");
+    std::string raw = exec("lspci | grep -E 'VGA|3D'");
     
-    // get rid of trailing curly braces
-    //name.erase(0, 1);
-    //name.erase(name.size() - 1);
-
-    return name;
+    size_t start = raw.rfind('[');
+    size_t end = raw.rfind(']');
+    
+    return raw.substr(start + 1, end - start - 1);
 }
 
 /**
@@ -46,7 +45,7 @@ double get_gpu_temp()
  * Reference:
  *   https://unix.stackexchange.com/questions/576707/how-to-monitor-amd-gpu-on-linux-server
  * 
- * @returns GPU Usage in percent.
+ * @returns GPU Usage in percent for single GPU systems, because who can afford more than one these days.
  */
 double get_gpu_usage()
 {
@@ -59,4 +58,24 @@ double get_gpu_usage()
     return usage;
 }
 
-// TODO: IMPLEMENT VRAM USAGE AND TOTAL
+double get_total_vram()
+{
+    std::ifstream file("/sys/class/drm/card1/device/mem_info_vram_total");
+    double total_vram;
+
+    file >> total_vram;
+    file.close();
+
+    return total_vram;
+}
+
+double get_vram_usage()
+{
+    std::ifstream file("/sys/class/drm/card1/device/mem_info_vram_used");
+    double vram_used;
+
+    file >> vram_used;
+    file.close();
+
+    return vram_used;
+}
