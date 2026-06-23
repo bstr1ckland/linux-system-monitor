@@ -1,8 +1,14 @@
 #include <cmath>
+#include <chrono>
 #include <iostream>
 #include <filesystem>
+#include <thread>
+
 #include <ftxui/dom/elements.hpp>
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/screen/screen.hpp>
+
 #include "cpu.h"
 #include "gpu.h"
 #include "utils.h"
@@ -12,48 +18,81 @@
 using namespace std;
 namespace fs = std::filesystem;
 
+// Default values for non-constant variable (to be updated)
+double avg_cpu_freq = 0.0;
+double cpu_usage = 0.0;
+double cpu_temperature = 0.0;
+double gpu_temp = 0.0;
+double gpu_usage = 0.0;
+double idle_time = 0.0;
+double system_uptime = 0.0;
+double used_ram = 0.0;
+double vram_usage = 0.0;
+
+std::vector<double> cpu_freq_per_core = {};
+std::vector<double> cpu_usage_per_core = {};
+
+// Thread function that updates non-constant values
+bool run_thread = true;
+
+void update_values(ftxui::ScreenInteractive& screen)
+{
+    while (run_thread)
+    {
+        avg_cpu_freq = get_avg_cpu_freq();
+        cpu_usage = get_cpu_usage();
+        cpu_temperature = get_cpu_temperature();
+        cpu_freq_per_core = get_cpu_freq_per_core();
+        cpu_usage_per_core = get_cpu_usage_per_core();
+        gpu_temp = get_gpu_temp();
+        gpu_usage = get_gpu_usage();
+        idle_time = get_idle_time();
+        system_uptime = get_system_uptime();
+        used_ram = get_used_ram();
+        vram_usage = get_vram_usage();
+
+        screen.PostEvent(ftxui::Event::Custom); // redraws UI
+    }
+}
+
 int main()
 {
     using namespace ftxui;
 
-    // CPU 
-    double max_cpu_freq = get_max_cpu_freq();
+    // Constants
     int core_count = get_core_count();
-    std::string cpu_name = get_cpu_name();
-
-    double avg_cpu_freq;
-    double cpu_usage;
-    double cpu_temperature;
-    std::vector<double> cpu_freq_per_core;
-    std::vector<double> cpu_usage_per_core;
-
-
-    // GPU 
+    double max_cpu_freq = get_max_cpu_freq();
+    double total_ram = get_total_ram();
     double total_vram = get_total_vram();
+
+    std::string cpu_name = get_cpu_name();
     std::string gpu_name = get_gpu_name();
-
-    double gpu_temp;
-    double gpu_usage;
-    double vram_usage;
-
-
-    // System 
     std::string system_version = get_version();
 
-    double system_uptime;
-    double idle_time;
+    // Create an interactive screen instance
+    auto screen = ftxui::ScreenInteractive::Fullscreen();
 
+    // Thread to update non-constant values
+    thread updater(update_values, std::ref(screen));
 
-    // RAM 
-    double total_ram = get_total_ram();
+    // Define the visual element
+    auto renderer = Renderer([&] {
+        return window(
+            text(" Linux (AMD) System Monitor "),
+            vbox({
+                text(cpu_name),
+                text("CPU Usage: " + std::to_string(cpu_usage) + "%"),
+                text("CPU Temperature: " + std::to_string(cpu_temperature) + "°C"),
+            })
+        );
+    });
 
-    double used_ram;
-
-
-    while (true)
-    {
-        
-    }
+    // Loops program
+    screen.Loop(renderer); 
+    
+    // End of program
+    run_thread = false;
+    updater.join();
     
     return 0;
 }

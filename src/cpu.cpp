@@ -12,7 +12,7 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-// TODO: Optimize get_core_count() calls, and make it a variable in this file, or a parameter for functions that need it
+static int core_count = 0;
 
 /**
  * Reference: 
@@ -22,6 +22,11 @@ namespace fs = std::filesystem;
  */
 int get_core_count()
 {
+    if (core_count != 0)
+    {
+        return core_count;
+    }
+
     std::ifstream file("/proc/cpuinfo");
     std::string line;
 
@@ -32,7 +37,8 @@ int get_core_count()
         if (line.find("siblings") != std::string::npos)
         {
             size_t value = line.find_first_of("0123456789");
-            return std::stoi(line.substr(value));
+            core_count = stoi(line.substr(value));
+            return core_count;
         }
     }
     
@@ -90,12 +96,12 @@ double get_avg_cpu_freq()
     std::vector<double> cpu_freqs = get_cpu_freq_per_core();
     double sum = 0;
 
-    for (int i = 0; i < get_core_count(); i++)
+    for (int i = 0; i < core_count; i++)
     {
         sum += cpu_freqs[i];
     }
 
-    sum /= get_core_count();
+    sum /= core_count;
 
     return std::round(sum * 100.0) / 100.0; // convert to GHz
 }
@@ -112,7 +118,9 @@ std::vector<double> get_cpu_freq_per_core()
     std::ifstream file("/proc/cpuinfo");
     std::string line;
 
-    for (int i = 0; i < get_core_count(); i++)
+    cpu_freqs.reserve(core_count);
+
+    for (int i = 0; i < core_count; i++)
     {
         while (getline(file, line))
         {
@@ -124,6 +132,7 @@ std::vector<double> get_cpu_freq_per_core()
                 freq /= 1000.0;
                 freq = std::round(freq * 100.0) / 100.0;
                 cpu_freqs.push_back(freq);
+                break;
             }
         }
     }
@@ -182,7 +191,6 @@ double get_cpu_usage()
 std::vector<double> get_cpu_usage_per_core()
 {
     std::vector<double> core_percentages;
-    int core_count = get_core_count();
 
     for (int i = 0; i < core_count; i++)
     {
