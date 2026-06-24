@@ -75,15 +75,56 @@ int main()
     // Thread to update non-constant values
     thread updater(update_values, std::ref(screen));
 
-    // Define the visual element
-    auto renderer = Renderer([&] {
+    // Component sub-panels, then combined into one
+    auto system_info_renderer = Renderer([&] {
+        return vbox({
+            text("  version: " + system_version),
+            text("  uptime: " + std::to_string(system_uptime)),
+            // ...
+        });
+    });
+
+    auto system_info = Collapsible(" system ", system_info_renderer, true);
+
+    auto cpu_info_renderer = Renderer([&] {
+        return vbox({
+            text("CPU: " + cpu_name),
+            // ...
+        });
+    });
+
+    auto cpu_info = Collapsible(" cpu ", cpu_info_renderer, true);
+
+    auto gpu_info_renderer = Renderer([&] {
+        return vbox({
+            text("GPU: " + gpu_name),
+            // ...
+        });
+    });
+
+    auto gpu_info = Collapsible(" gpu ", gpu_info_renderer, true);
+
+    auto ram_info_renderer = Renderer([&] {
+        return vbox({
+            text("RAM: " + std::to_string(used_ram) + " / " + std::to_string(total_ram) + " GB"),
+            // ...
+        });
+    });
+    
+    auto ram_info = Collapsible(" ram ", ram_info_renderer, true);
+
+    // Combine into one
+    auto main_container = Container::Vertical({
+        system_info,
+        cpu_info,
+        gpu_info,
+        ram_info,
+    });
+
+    auto renderer = Renderer(main_container, [&] {
         return window(
-            text(" Linux (AMD) System Monitor "),
-            vbox({
-                text(cpu_name),
-                text("CPU Usage: " + std::to_string(cpu_usage) + "%"),
-                text("CPU Temperature: " + std::to_string(cpu_temperature) + "°C"),
-            })
+            text(" linux (amd) system monitor "),
+            main_container->Render()
         );
     });
 
