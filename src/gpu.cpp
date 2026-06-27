@@ -1,3 +1,4 @@
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -38,7 +39,7 @@ double get_gpu_temp()
     file >> temp;
     file.close();
 
-    return temp;
+    return temp / 1000;
 }
 
 /**
@@ -66,7 +67,7 @@ double get_total_vram()
     file >> total_vram;
     file.close();
 
-    return total_vram;
+    return total_vram / 1073741824.0;
 }
 
 double get_vram_usage()
@@ -77,5 +78,5 @@ double get_vram_usage()
     file >> vram_used;
     file.close();
 
-    return vram_used;
+    return vram_used / 1073741824.0;
 }

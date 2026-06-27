@@ -89,58 +89,6 @@ double get_max_cpu_freq()
 }
 
 /**
- * @returns Average clock speed/frequency of all CPU cores (GHz).
- */
-double get_avg_cpu_freq()
-{
-    std::vector<double> cpu_freqs = get_cpu_freq_per_core();
-    double sum = 0;
-
-    for (int i = 0; i < core_count; i++)
-    {
-        sum += cpu_freqs[i];
-    }
-
-    sum /= core_count;
-
-    return std::round(sum * 100.0) / 100.0; // convert to GHz
-}
-
-/**
- * Reference:
- *   https://askubuntu.com/questions/218567/any-way-to-check-the-clock-speed-of-my-processor
- * 
- * @returns Vector of CPU clock speed/frequency per core (GHz).
- */
-std::vector<double> get_cpu_freq_per_core()
-{
-    std::vector<double> cpu_freqs;
-    std::ifstream file("/proc/cpuinfo");
-    std::string line;
-
-    cpu_freqs.reserve(core_count);
-
-    for (int i = 0; i < core_count; i++)
-    {
-        while (getline(file, line))
-        {
-            if (line.find("cpu MHz") != std::string::npos)
-            {
-                size_t value = line.find_first_of("0123456789");
-                double freq = std::stod(line.substr(value));
-
-                freq /= 1000.0;
-                freq = std::round(freq * 100.0) / 100.0;
-                cpu_freqs.push_back(freq);
-                break;
-            }
-        }
-    }
-
-    return cpu_freqs;
-}
-
-/**
  * References:
  *  https://www.linuxhowtos.org/System/procstat.htm ,
  *  https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux

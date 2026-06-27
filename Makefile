@@ -1,6 +1,6 @@
 main: src/main.cpp
-	g++ -Iinclude src/main.cpp src/cpu.cpp src/utils.cpp src/system.cpp src/gpu.cpp src/ram.cpp -o main \
+	g++ -std=c++20 -Iinclude src/main.cpp src/cpu.cpp src/utils.cpp src/system.cpp src/gpu.cpp src/ram.cpp -o lhmon \
   	-lftxui-component -lftxui-dom -lftxui-screen
 
 clean:
-	rm main
+	rm lhwmon
