@@ -1,5 +1,5 @@
-# linux-system-monitor / lhmon
-System monitor for Linux AMD CPU + GPU systems.
+# linux-hardware-monitor / lhmon
+System hardware monitor for Linux AMD CPU + GPU systems.
 
 This montoring app program to report statistics of hardware usage (%), temperature (°C), and more.
 
